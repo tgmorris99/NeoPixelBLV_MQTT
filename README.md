@@ -11,7 +11,7 @@ These instructions will get you a copy of the project up and running on your loc
 * Working WiFi connection to RPi
 
 ### Requirements
-*Tested with WeMos D1 Mini compatible (https://www.amazon.com/gp/product/B081PX9YFV) and NodeMCU CP2102 ESP-12E (https://www.amazon.com/gp/product/B07HF44GBT) but almost any ESP8266 based board should work.
+* Tested with WeMos D1 Mini compatible (https://www.amazon.com/gp/product/B081PX9YFV) and NodeMCU CP2102 ESP-12E (https://www.amazon.com/gp/product/B07HF44GBT) but almost any ESP8266 based board should work.
 * Adafruit.NeopixelLibrary (minimum version 1.2.3) (https://github.com/adafruit/Adafruit_NeoPixel)
 * WiFi Library (https://www.arduino.cc/en/Reference/WiFi)
 * ESP8266 Library (https://github.com/plapointe6/EspMQTTClient)
