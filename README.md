@@ -28,11 +28,22 @@ To set up your Arduino IDE go to File->Preferences and copy the desired URL to t
 ## Installing
 To configure the sketch to your personal needs, change the parameters for the WiFI and MQTT section near the top and then move on to the settings marked in the "User-Config" part in the sketch file before compiling and uploading it to your Arduino.
 
-To configure the MQTT Plugin select the options as shown below. Feel free to leave the default value of “octoPrint” for the base value if a local MQTT Broker is being used. If using a common broker, select a unique identifier and also adjust the settings in the sketch to match or you won’t see any updates.
+To configure the MQTT Plugin select the options as explained below. Feel free to leave the default value of “octoPrint” for the base topic if a local MQTT Broker is being used. If using a common broker, select a unique identifier and also adjust the settings in the sketch to match or you won’t see any updates.
 
 The sketch will first connect to the specified Wifi network and then connect to the MQTT client. Once fully connected it will subscribe to the topics needed to provide the status information used to update the individual status rings. Each time a connection to the MQTT client is made the active rings will display a rainbow pattern. This feature will also provide notification if the client connection ever drops and reconnects.
 
 I used a tutorial like [this one](https://randomnerdtutorials.com/how-to-install-mosquitto-broker-on-raspberry-pi/) to install the MQTT broker and clients on the RPi.
+
+### Configuring the OctoPrint MQTT Plugin
+
+#### Broker Tab
+For the Host use either "octopi.local" or the IP Address of the RPi. The other inputs may remain at the default values. All the other options should remain unchecked except for *Enable retain flag* and *Clean Session*.
+
+#### Topics Tab
+Under *Event Messages* only *Activate event messages* and *Printing events* should be checked. For *Progress Messages* only *Activate progress messages* should be checked. For *Temperature messages*, *Activate temperature messages* should be checked. It is safe to set the threshold to zero as that will provide a regular update even when the temperature isn't changing.
+
+#### Status & Last Will
+Remains unchanged.
 
 ## License
 
