@@ -4,7 +4,7 @@ NeoPixel sketch based on the work done by Claus Noack (https://github.com/mule19
 With this version of the sketch you can use Neopixels to show the hotend- and heatbed-temperature and the different printer status including print progress while using OctoPrint with almost any printer and not just those that are Duet based systems. As with the original version you retain the ability to have nearly full control on the NeoPixels and their configuration.
 
 ## Getting Started
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine.
 
 ### Prerequisites
 * Raspberry Pi with MQTT broker installed and running OctoPrint with MQTT Plugin
@@ -18,11 +18,11 @@ These instructions will get you a copy of the project up and running on your loc
 * MQTT Library (https://github.com/plapointe6/EspMQTTClient)
 
 ## Installing
-To configure the sketch to your personal needs, change the parameters for the WiFI and MQTT section at the top and then move on to those marked in the "User-Config" part in the sketch file before compiling and uploading it to your Arduino.
+To configure the sketch to your personal needs, change the parameters for the WiFI and MQTT section near the top and then move on to those settings marked in the "User-Config" part in the sketch file before compiling and uploading it to your Arduino.
 
-To configure the MQTT Plugin select the option as shown below. You can leave the default value of “octoPrint” for the base value if you are using a local MQTT Broker. If using a common broker, select a unique identifier and also adjust the settings in the sketch to match or you won’t see any updates.
+To configure the MQTT Plugin select the options as shown below. Feel free to leave the default value of “octoPrint” for the base value if a local MQTT Broker is being used. If using a common broker, select a unique identifier and also adjust the settings in the sketch to match or you won’t see any updates.
 
-The sketch will first connect to the specified Wifi network and then connect to the MQTT client. Once connected then it will subscribe to the topics needed to provide the status information needed to update the status rings. Each time it connects to the MQTT client the active rings will display a rainbow pattern, which will also provide notification if the client connection ever drops and reconnects.
+The sketch will first connect to the specified Wifi network and then connect to the MQTT client. Once fully connected it will subscribe to the topics needed to provide the status information used to update the individual status rings. Each time a connection to the MQTT client is made the active rings will display a rainbow pattern. This feature will also provide notification if the client connection ever drops and reconnects.
 
 ### Installing
 
