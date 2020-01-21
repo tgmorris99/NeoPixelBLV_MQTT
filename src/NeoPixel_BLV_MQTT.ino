@@ -27,7 +27,7 @@ const char*   TopicEvent        = "octoPrint/event/#";
 const char*   TopicTemperature  = "octoPrint/temperature/#";
 const char*   TopicProgress     = "octoPrint/progress/printing/#";
 const char*   MQTTClient        = "octoPrintClient";
-unsigned int  MQTTFlush;
+unsigned long MQTTFlush;
 unsigned long lastReconnectAttempt = 0;
 
 #define MQTTDelay 5000  // number of milliseconds to ignore retained TopicEvent messages after startup
