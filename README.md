@@ -7,7 +7,7 @@ With this version of the sketch you can use Neopixels to show the hotend- and he
 These instructions will get you a copy of the project up and running on your local machine.
 
 ### Prerequisites
-* Raspberry Pi with MQTT broker installed and running OctoPrint with MQTT Plugin
+* Raspberry Pi with MQTT broker and client installed and running OctoPrint with the MQTT Plugin - this is the minimum configuration and is a standalone environment. The MQTT client is required by the MQTT Plugin and must be installed on the RPi running OctoPrint. The broker may either be hosted locally or on a common device so long as the necessary configuration changes are made in the sketch.
 * Working WiFi connection to RPi
 
 ### Requirements
@@ -23,6 +23,8 @@ To configure the sketch to your personal needs, change the parameters for the Wi
 To configure the MQTT Plugin select the options as shown below. Feel free to leave the default value of “octoPrint” for the base value if a local MQTT Broker is being used. If using a common broker, select a unique identifier and also adjust the settings in the sketch to match or you won’t see any updates.
 
 The sketch will first connect to the specified Wifi network and then connect to the MQTT client. Once fully connected it will subscribe to the topics needed to provide the status information used to update the individual status rings. Each time a connection to the MQTT client is made the active rings will display a rainbow pattern. This feature will also provide notification if the client connection ever drops and reconnects.
+
+I used a tutorial like [this one](https://randomnerdtutorials.com/how-to-install-mosquitto-broker-on-raspberry-pi/) to install the MQTT broker and clients on the RPi.
 
 ### Installing
 
