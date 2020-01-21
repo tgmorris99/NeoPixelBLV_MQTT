@@ -15,7 +15,7 @@ These instructions will get you a copy of the project up and running on your loc
 * Adafruit.NeopixelLibrary (minimum version 1.2.3) (https://github.com/adafruit/Adafruit_NeoPixel)
 * WiFi Library (https://www.arduino.cc/en/Reference/WiFi)
 * ESP8266 Library (https://github.com/plapointe6/EspMQTTClient)
-* MQTT Library (https://github.com/plapointe6/EspMQTTClient) NOTE: Requires a change to MQTT_MAX_PACKET_SIZE from the default value of 128 to a value of 1024 in PubSubClient.h
+* MQTT Library (https://pubsubclient.knolleary.net/) NOTE: Requires a change to MQTT_MAX_PACKET_SIZE from the default value of 128 to a value of 1024 in PubSubClient.h
 
 ## Installing
 To configure the sketch to your personal needs, change the parameters for the WiFI and MQTT section near the top and then move on to those settings marked in the "User-Config" part in the sketch file before compiling and uploading it to your Arduino.
