@@ -388,30 +388,44 @@ void GetSerialMessage() {
   AnalyzeSerialMessage();
 #endif
 }
+void NeoPixelWalkingBit(unsigned PixelNumber, uint32_t PixelColor, int wait) {
 
-void NeoPixelRainbow(int HotendTempArduinoPin, int PrinterStatusArduinoPin, int HeatbedTempArduinoPin, int PixelCount, int wait) {
-  Adafruit_NeoPixel HotendTempRing = Adafruit_NeoPixel(PixelCount, HotendTempArduinoPin, NEO_GRB + NEO_KHZ800);
-  Adafruit_NeoPixel PrinterStatRing = Adafruit_NeoPixel(PixelCount, PrinterStatusArduinoPin, NEO_GRB + NEO_KHZ800);
-  Adafruit_NeoPixel HeatbedTempRing = Adafruit_NeoPixel(PixelCount, HeatbedTempArduinoPin, NEO_GRB + NEO_KHZ800);
-  int i, j;
+  if (PixelNumber > 0 ) {
+    // turn off the previous pixel
+    NeoPixelTempHotend.setPixelColor((PixelNumber - 1) % NeoPixelTempHotendCount, ConvertColor(0, 0, 0));
+    NeoPixelPrinterStat.setPixelColor((PixelNumber - 1) % NeoPixelPrinterStatCount, ConvertColor(0, 0, 0));
+    NeoPixelTempHeatbed.setPixelColor((PixelNumber - 1) % NeoPixelTempHeatbedCount, ConvertColor(0, 0, 0));
+  }
 
-  // set things up
-  HotendTempRing.begin();
-  HotendTempRing.setBrightness(NeopixelTempHeatbedBrightness);
-  PrinterStatRing.begin();
-  PrinterStatRing.setBrightness(NeopixelTempHeatbedBrightness);
-  HeatbedTempRing.begin();
-  HeatbedTempRing.setBrightness(NeopixelTempHeatbedBrightness);
+  // turn on the desired pixel
+  NeoPixelTempHotend.setPixelColor(PixelNumber % NeoPixelTempHotendCount, PixelColor);
+  NeoPixelPrinterStat.setPixelColor(PixelNumber % NeoPixelPrinterStatCount, PixelColor);
+  NeoPixelTempHeatbed.setPixelColor(PixelNumber % NeoPixelTempHeatbedCount, PixelColor);
+
+  // refresh the displays
+  if (NeoPixelTempHotendActive == true) NeoPixelTempHotend.show();
+  if (NeoPixelPrinterStatActive == true) NeoPixelPrinterStat.show();
+  if (NeoPixelTempHeatbedActive == true) NeoPixelTempHeatbed.show();
+}
+
+void NeoPixelRainbow(int wait) {
+  int i, j, n;
+
+  // use the largest number of pixels for the loop in case they're different for some reason
+  n = max(max(NeoPixelTempHotendCount, NeoPixelPrinterStatCount), NeoPixelTempHeatbedCount);
 
   for (j = 0; j < 256; j++) {
-    for (i = 0; i < HotendTempRing.numPixels(); i++) {
-      HotendTempRing.setPixelColor(i, Wheel(HotendTempRing, (i + j) & 255));
-      PrinterStatRing.setPixelColor(i, Wheel(PrinterStatRing, (i + j) & 255));
-      HeatbedTempRing.setPixelColor(i, Wheel(HeatbedTempRing, (i + j) & 255));
+    for (i = 0; i < n; i++) {
+      if (i <= NeoPixelTempHotendCount) NeoPixelTempHotend.setPixelColor(i, Wheel(NeoPixelTempHotend, (i + j) & 255));
+      if (i <= NeoPixelPrinterStatCount) NeoPixelPrinterStat.setPixelColor(i, Wheel(NeoPixelPrinterStat, (i + j) & 255));
+      if (i <= NeoPixelTempHeatbedCount) NeoPixelTempHeatbed.setPixelColor(i, Wheel(NeoPixelTempHeatbed, (i + j) & 255));
     }
-    if (NeoPixelTempHotendActive == true) HotendTempRing.show();
-    if (NeoPixelPrinterStatActive == true) PrinterStatRing.show();
-    if (NeoPixelTempHeatbedActive == true) HeatbedTempRing.show();
+
+    // refresh the displays
+    if (NeoPixelTempHotendActive == true) NeoPixelTempHotend.show();
+    if (NeoPixelPrinterStatActive == true) NeoPixelPrinterStat.show();
+    if (NeoPixelTempHeatbedActive == true) NeoPixelTempHeatbed.show();
+
     delay(wait);
   }
 }
@@ -433,7 +447,7 @@ uint32_t Wheel(Adafruit_NeoPixel &strip, byte WheelPos) {
 
 void  NeoPixelReset()
 {
-  // (re)Initialize Neopixels after MQTT connect
+  // (re)Initialize Neopixels after WiFi & MQTT connect
   if (NeoPixelTempHotendActive == true) {
     NeoPixelTempHotend.begin();
     NeoPixelTempHotend.setBrightness(NeopixelTempHotendBrightness);
@@ -463,7 +477,7 @@ boolean reconnect() { // MQTT (re)connect and subscribe to topics
   // need to ignore retained printer status messages when (re)connecting
   MQTTFlush = millis() + MQTTDelay;
 
-  NeoPixelRainbow(NeoPixeTempHotendArduinoPin, NeoPixePrinterStatArduinoPin, NeoPixeTempHeatbedArduinoPin, NeoPixelTempHotendCount, 10);
+  NeoPixelRainbow(10);
   NeoPixelReset();
 
 #if defined(REMOTE_SERVER)
@@ -674,6 +688,8 @@ void callback(char* topic, byte* payload, unsigned int length)
 // Initialize everything and prepare to start
 void setup()
 {
+  unsigned walkingPixel = 0;
+
   // set up serial port for debug if needed
 #if defined(DEBUGLEVEL0_ACTIVE) || defined(DEBUGLEVEL1_ACTIVE) || defined(DEBUGLEVEL2_ACTIVE) || defined(DEBUGLEVEL3_ACTIVE) ||  defined(DEBUGLEVEL4_ACTIVE)
   Serial.begin(115200);
@@ -692,14 +708,20 @@ void setup()
 #if defined(DEBUGLEVEL0_ACTIVE)
   Serial.print("Connecting to WiFi..");
 #endif
+
+  // reset / initialize the NeopPixels since we're going to use them
+  NeoPixelReset();
+
   while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
+    NeoPixelWalkingBit(walkingPixel++, ConvertColor(0, 128, 0), 10);
+    delay(250);
 #if defined(DEBUGLEVEL0_ACTIVE)
     Serial.print(".");
 #else
     ;
 #endif
   }
+
 #if defined(DEBUGLEVEL0_ACTIVE)
   Serial.println("\nConnected to the WiFi network");
 #endif
