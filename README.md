@@ -1,5 +1,5 @@
 # NeoPixelBLV_MQTT
-NeoPixel sketch based on the work done by Claus Noack (https://github.com/mule1972/NeoPixelBLVmgn) for the 3D-Printer project from Ben Levi (https://www.thingiverse.com/thing:3382718)
+NeoPixel sketch based on the work done by Claus Noack (https://github.com/mule1972/NeoPixelBLVmgn) for the 3D-Printer project from Ben Levi (https://www.thingiverse.com/thing:3382718). This version of the sketch also includes the on-off feature of the branch created by [sadegroo](https://github.com/sadegroo).
 
 With this version of the sketch you can use Neopixels to show the hotend- and heatbed-temperature and the different printer status including print progress while using OctoPrint with almost any printer and not just those that are Duet based systems. As with the original version you retain the ability to have nearly full control on the NeoPixels and their configuration.
 
