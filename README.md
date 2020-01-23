@@ -31,7 +31,7 @@ To configure the sketch to your personal needs, change the parameters for the Wi
 
 To configure the MQTT Plugin select the options as explained below. Feel free to leave the default value of “octoPrint” for the base topic if a local MQTT Broker is being used. If using a common broker, select a unique identifier and also adjust the settings in the sketch to match or you won’t see any updates.
 
-The sketch will first display a walking bit pattern while connecting to the specified WiFi network. After the WiFi connection is established the sketch will then connect to the MQTT client. Once fully connected the sketch will subscribe to the topics needed to provide the status information used to update the individual status rings. Each time a connection to the MQTT client is made the active rings will display a rainbow pattern. This feature will also provide notification if the MQTT client connection ever drops and reconnects.
+The sketch will first display a walking bit pattern while connecting to the specified WiFi network. After the WiFi connection is established the sketch will then connect to the MQTT client. Once fully connected the sketch will subscribe to the topics needed to provide the status information used to update the individual status rings. Each time a connection to the MQTT broker is made the active rings will display a rainbow pattern. This feature will also provide notification if the MQTT connection ever drops and reconnects.
 
 I used a tutorial like [this one](https://randomnerdtutorials.com/how-to-install-mosquitto-broker-on-raspberry-pi/) to install the MQTT broker and clients on the RPi.
 
