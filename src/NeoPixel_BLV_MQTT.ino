@@ -62,13 +62,15 @@ static uint32_t  ConvertColor(uint8_t red, uint8_t green, uint8_t blue) {
 // ********** User-Config Begin **********
 
 #define PIN_D2  4   // GPIO4
-#define PIN_D3  0   // GPIO0
+#define PIN_D3  0   // GPIO0 - 10k pull-up
+#define PIN_D4  2   // GPIO2 - Built-in LED
 #define PIN_D5  14  // GPIO14
 #define PIN_D6  13  // GPIO13
 #define PIN_D7  12  // GPIO12
 
 // NeoPixels On-Off button - based on branch done by sadegroo
 // Select NEITHER or ONE of these options to use an on-off button
+// The code is set to have the Button LED illuminate when the printer display is turned off
 //#define ON_OFF_BUTTON_MOMENTARY
 //#define ON_OFF_BUTTON_LATCHING
 //#define ON_OFF_BUTTON_DEBUG
@@ -79,7 +81,7 @@ static uint32_t  ConvertColor(uint8_t red, uint8_t green, uint8_t blue) {
 
 #if defined(ON_OFF_BUTTON_MOMENTARY) || defined(ON_OFF_BUTTON_LATCHING)
 #define BUTTON_PIN  PIN_D3  // ON-OFF button
-#define LED_PIN     PIN_D2  // LED for debounce check
+#define LED_PIN     PIN_D4  // LED for debounce check
 bool OnOffState = true;     // default initial state
 Bounce OnOffDebouncer = Bounce();
 #endif
@@ -470,14 +472,14 @@ void NeoPixelRefresh(bool MustShow) {
 #else
   if (MustShow) {
 #endif
-if (NeoPixelTempHotendActive == true) NeoPixelTempHotend.show();
+    if (NeoPixelTempHotendActive == true) NeoPixelTempHotend.show();
     if (NeoPixelPrinterStatActive == true) NeoPixelPrinterStat.show();
     if (NeoPixelTempHeatbedActive == true) NeoPixelTempHeatbed.show();
   }
   else {
-    NeoPixelTempHotend.clear();
-    NeoPixelPrinterStat.clear();
-    NeoPixelTempHeatbed.clear();
+    NeoPixelTempHotend.clear(); NeoPixelTempHotend.show();
+    NeoPixelPrinterStat.clear(); NeoPixelPrinterStat.show();
+    NeoPixelTempHeatbed.clear(); NeoPixelTempHeatbed.show();
   }
 }
 
@@ -780,10 +782,6 @@ void setup()
   pinMode(LED_PIN, OUTPUT); // Setup the LED
 #endif
 
-#if (defined(ON_OFF_BUTTON_MOMENTARY) || defined(ON_OFF_BUTTON_LATCHING)) && defined(ON_OFF_BUTTON_DEBUG)
-  DebugOnOff();
-#endif
-
   //Default start values for animations
   NeoPixelTempHotendAnimation.Position = 0;
   NeoPixelTempHotendAnimation.Position_Memory = 0;
@@ -848,9 +846,11 @@ void DebugOnOff() {
 
   if (millis() > millismem) {
     Serial.print("button pin: ");
-    Serial.println(digitalRead(BUTTON_PIN));
-    Serial.print("Debounced: ");
-    Serial.println(OnOffDebouncer.read());
+    Serial.print(digitalRead(BUTTON_PIN));
+    Serial.print(", Debounced: ");
+    Serial.print(OnOffDebouncer.read());
+    Serial.print(", OnOff: ");
+    Serial.println(OnOffState);
     millismem += 1000;
   }
 }
@@ -893,6 +893,9 @@ void loop()
   digitalWrite(LED_PIN, OnOffState);
 #endif
 
+#if (defined(ON_OFF_BUTTON_MOMENTARY) || defined(ON_OFF_BUTTON_LATCHING)) && defined(ON_OFF_BUTTON_DEBUG)
+  DebugOnOff();
+#endif
 
   //NeopixelRefresh?
   if ((millis() - NeoPixelTimerRefresh) >= NeopixelRefreshSpeed) {
