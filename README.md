@@ -17,6 +17,7 @@ These instructions will get you a copy of the project up and running on your loc
 * WiFi Library (https://www.arduino.cc/en/Reference/WiFi)
 * ESP8266 Library (https://github.com/plapointe6/EspMQTTClient)
 * MQTT Library (https://pubsubclient.knolleary.net/) NOTE: Requires a change to MQTT_MAX_PACKET_SIZE from the default value of 128 to a value of 1024 in PubSubClient.h
+* Optional: Bounce2 Library (https://github.com/thomasfredericks/Bounce2) if using a button to control whether the NeoPixel displays are 'On' or 'Off'
 
 ### Notes
 It is also necessary to include some additional libraries for the Arduino IDE. Depending on which board you choose select one of the following - or both as it really doesn't matter.
