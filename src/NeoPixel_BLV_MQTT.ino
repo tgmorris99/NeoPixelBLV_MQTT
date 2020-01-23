@@ -71,7 +71,10 @@ static uint32_t  ConvertColor(uint8_t red, uint8_t green, uint8_t blue) {
 // NeoPixels On-Off button - based on branch done by sadegroo
 // Select NEITHER or ONE of these options to use an on-off button
 // The code is set to have the Button LED illuminate when the printer display is turned off
-//#define ON_OFF_BUTTON_MOMENTARY
+
+// The default can be left with the momentary button selected as the default starting value is
+// for the displays to be in the ON state. A button can then be added at a later date if desired.
+#define ON_OFF_BUTTON_MOMENTARY
 //#define ON_OFF_BUTTON_LATCHING
 //#define ON_OFF_BUTTON_DEBUG
 
@@ -469,18 +472,18 @@ uint32_t Wheel(Adafruit_NeoPixel &strip, byte WheelPos) {
 void NeoPixelRefresh(bool MustShow) {
 #if defined(ON_OFF_BUTTON_MOMENTARY) || defined(ON_OFF_BUTTON_LATCHING)
   if (OnOffState || MustShow) {
-#else
-  if (MustShow) {
 #endif
     if (NeoPixelTempHotendActive == true) NeoPixelTempHotend.show();
     if (NeoPixelPrinterStatActive == true) NeoPixelPrinterStat.show();
     if (NeoPixelTempHeatbedActive == true) NeoPixelTempHeatbed.show();
+#if defined(ON_OFF_BUTTON_MOMENTARY) || defined(ON_OFF_BUTTON_LATCHING)
   }
   else {
     NeoPixelTempHotend.clear(); NeoPixelTempHotend.show();
     NeoPixelPrinterStat.clear(); NeoPixelPrinterStat.show();
     NeoPixelTempHeatbed.clear(); NeoPixelTempHeatbed.show();
   }
+#endif
 }
 
 void  NeoPixelReset()
