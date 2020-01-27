@@ -648,6 +648,11 @@ void callback(char* topic, byte* payload, unsigned int length)
       Serial.print("PROGRESS: ");
       Serial.println(MQTTPrinter.FractionPrinted);
 #endif
+      if (MQTTPrinter.Status != 'P') {
+        if ((MQTTPrinter.TargetTempHotend > 0)  && (MQTTPrinter.TargetTempHeatbed > 0)) {
+          MQTTPrinter.Status = 'P';  // looks like we're actually printing
+        }
+      }
       break;
     case EVENT:
       // print job possibilities
@@ -1017,10 +1022,7 @@ void loop()
           //Display Print-Progress
           for (int NeoPixelPosition = 1; NeoPixelPosition <= NeoPixelPrinterStatCount; NeoPixelPosition++)
           {
-            if ((NeoPixelPosition == 1) && (Printer.FractionPrinted > 0.0)) { // this catches values that are too low to trigger initially
-              NeoPixelPrinterStat.setPixelColor(ConvertPosition2PixelIndex(NeoPixelPrinterStatCount, NeoPixelPrinterStatPixelOffset, NeoPixelPosition), NeoPixelPrinterStatColorPrintingDone);
-            }
-            else if (NeoPixelPosition < (Printer.FractionPrinted * NeoPixelPrinterStatCount)) {
+            if (NeoPixelPosition < (Printer.FractionPrinted * NeoPixelPrinterStatCount)) {
               NeoPixelPrinterStat.setPixelColor(ConvertPosition2PixelIndex(NeoPixelPrinterStatCount, NeoPixelPrinterStatPixelOffset, NeoPixelPosition), NeoPixelPrinterStatColorPrintingDone);
             }
             else {
