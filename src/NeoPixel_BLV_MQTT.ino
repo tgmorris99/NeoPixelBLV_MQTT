@@ -115,6 +115,7 @@ bool NeoPixelPrinterStatAnimationActive = true; ///Animation for print progress 
 uint8_t NeopixelTempPrinterStatBrightness = 8; //Overall brightness of the Neopixel-LEDs
 uint32_t NeoPixelPrinterStatColorIdle = ConvertColor(255, 255, 255); //RGB values for specified status
 uint32_t NeoPixelPrinterStatColorPrinting = ConvertColor(64, 255, 64); //RGB values for specified status
+uint32_t NeoPixelPrinterStatColorPrintingActive = ConvertColor(0, 255, 0); //RGB values for specified status
 uint32_t NeoPixelPrinterStatColorPrintingDone = ConvertColor(0, 255, 0); //RGB values for specified status
 uint32_t NeoPixelPrinterStatColorStopped = ConvertColor(0, 0, 255); //RGB values for specified status
 uint32_t NeoPixelPrinterStatColorConfiguring = ConvertColor(255, 255, 0); //RGB values for specified status
@@ -515,9 +516,6 @@ boolean reconnect() { // MQTT (re)connect and subscribe to topics
   Serial.println(mqttServer);
 #endif
 
-  // need to ignore retained printer status messages when (re)connecting
-  MQTTFlush = millis() + MQTTDelay;
-
   NeoPixelRainbow(10);
   NeoPixelReset();
 
@@ -531,6 +529,10 @@ boolean reconnect() { // MQTT (re)connect and subscribe to topics
     Serial.println("Connected");
     Serial.println("Subscribing to topics");
 #endif
+
+    // need to ignore retained printer status messages when (re)connecting
+    MQTTFlush = millis() + MQTTDelay;
+
     client.subscribe(TopicEvent);
     client.subscribe(TopicProgress);
     client.subscribe(TopicTemperature);
@@ -649,7 +651,7 @@ void callback(char* topic, byte* payload, unsigned int length)
       Serial.println(MQTTPrinter.FractionPrinted);
 #endif
       if (MQTTPrinter.Status != 'P') {
-        if ((MQTTPrinter.TargetTempHotend > 0)  && (MQTTPrinter.TargetTempHeatbed > 0)) {
+        if (MQTTPrinter.TargetTempHotend > 0) {
           MQTTPrinter.Status = 'P';  // looks like we're actually printing
         }
       }
@@ -1024,6 +1026,12 @@ void loop()
           {
             if (NeoPixelPosition < (Printer.FractionPrinted * NeoPixelPrinterStatCount)) {
               NeoPixelPrinterStat.setPixelColor(ConvertPosition2PixelIndex(NeoPixelPrinterStatCount, NeoPixelPrinterStatPixelOffset, NeoPixelPosition), NeoPixelPrinterStatColorPrintingDone);
+            }
+            else if ((NeoPixelPosition-1) < (NeoPixelPrinterStatCount * Printer.FractionPrinted)) { // it's currently active
+              NeoPixelPrinterStat.setPixelColor(ConvertPosition2PixelIndex(NeoPixelPrinterStatCount, NeoPixelPrinterStatPixelOffset, NeoPixelPosition), NeoPixelPrinterStatColorPrintingActive);
+              //Define Animation-Range at currently active range
+              NeoPixelPrinterStatAnimation.RangeBegin = NeoPixelPosition;
+              NeoPixelPrinterStatAnimation.RangeEnd = NeoPixelPosition;
             }
             else {
               NeoPixelPrinterStat.setPixelColor(ConvertPosition2PixelIndex(NeoPixelPrinterStatCount, NeoPixelPrinterStatPixelOffset, NeoPixelPosition), NeoPixelPrinterStatColorPrinting);
