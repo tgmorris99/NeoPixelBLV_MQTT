@@ -33,6 +33,8 @@ To configure the MQTT Plugin select the options as explained below. Feel free to
 
 The sketch will first display a walking bit pattern while connecting to the specified WiFi network. After the WiFi connection is established the sketch will then connect to the MQTT broker. Once fully connected the sketch will subscribe to the topics needed to provide the status information used to update the individual status rings. Each time a connection to the MQTT broker is made the active rings will display a rainbow pattern. This feature will also provide notification if the MQTT connection ever drops and reconnects.
 
+NOTE: If OctoPrint is disconnected from the printer then the status rings will display as solid red. Once reconnected the status rings will resume normal updates.
+
 I used a tutorial like [this one](https://randomnerdtutorials.com/how-to-install-mosquitto-broker-on-raspberry-pi/) to install the MQTT broker and clients on the RPi.
 
 ### Configuring the OctoPrint MQTT Plugin
@@ -41,7 +43,7 @@ I used a tutorial like [this one](https://randomnerdtutorials.com/how-to-install
 For the Host use either "octopi.local" or the IP Address of the RPi. The other inputs may remain at the default values. All the other options should remain unchecked except for *Enable retain flag* and *Clean Session*.
 
 #### Topics Tab
-Under *Event Messages* only *Activate event messages* and *Printing events* should be checked. For *Progress Messages* only *Activate progress messages* should be checked. For *Temperature messages*, *Activate temperature messages* should be checked. It is safe to set the threshold to zero as that will provide a regular update even when the temperature isn't changing.
+Under *Event Messages* only *Activate event messages*, *Communication Events* and *Printing events* should be checked. For *Progress Messages* only *Activate progress messages* should be checked. For *Temperature messages*, *Activate temperature messages* should be checked. It is safe to set the threshold to zero as that will provide a regular update even when the temperature isn't changing.
 
 #### Status & Last Will
 Remains unchanged.
