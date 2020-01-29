@@ -31,7 +31,7 @@ const char*   MQTTClient        = "octoPrintClient";
 unsigned long MQTTFlush;
 unsigned long lastReconnectAttempt = 0;
 
-#define MQTTDelay 5000  // number of milliseconds to ignore retained TopicEvent messages after startup
+#define MQTTDelay 2000  // number of milliseconds to ignore retained TopicEvent messages after startup
 #define MQTTRetry 5000  // number of milliseconds to wait if the client.connect() fails
 
 // MQTT Message Types
@@ -40,6 +40,10 @@ unsigned long lastReconnectAttempt = 0;
 #define PROGRESS  3
 #define EVENT     4
 #define NOMATCH   0
+
+// MQTT Printer connection status
+#define OCTO_CONNECTED     1
+#define OCTO_DISCONNECTED  0
 
 #define DIRECT_UPDATE // bypasses encoding/decoding a pseudo serial message
 
@@ -117,6 +121,7 @@ uint32_t NeoPixelPrinterStatColorIdle = ConvertColor(255, 255, 255); //RGB value
 uint32_t NeoPixelPrinterStatColorPrinting = ConvertColor(64, 255, 64); //RGB values for specified status
 uint32_t NeoPixelPrinterStatColorPrintingActive = ConvertColor(0, 255, 0); //RGB values for specified status
 uint32_t NeoPixelPrinterStatColorPrintingDone = ConvertColor(0, 255, 0); //RGB values for specified status
+uint32_t NeoPixelPrinterStatColorDisconnected = ConvertColor(255, 0, 0); //RGB values for specified status
 uint32_t NeoPixelPrinterStatColorStopped = ConvertColor(0, 0, 255); //RGB values for specified status
 uint32_t NeoPixelPrinterStatColorConfiguring = ConvertColor(255, 255, 0); //RGB values for specified status
 uint32_t NeoPixelPrinterStatColorPaused = ConvertColor(160, 32, 240); //RGB values for specified status
@@ -225,6 +230,7 @@ class octoPrintStatus {
     int   HeaterStatusHotend;
     float FractionPrinted;
     bool  UpdatePending;
+    int   ConnectState;
 };
 octoPrintStatus MQTTPrinter;
 
@@ -656,7 +662,37 @@ void callback(char* topic, byte* payload, unsigned int length)
         }
       }
       break;
+
+#if defined(DEBUGLEVEL3_ACTIVE)
+      Serial.print("EVENT");
+#endif
     case EVENT:
+      // communication events
+      //    Disconnecting
+      //    Disconnected
+      //    Connecting
+      //    Connected
+
+      if (JsonParseRoot(tempstring, "_event", 0) == " Connecting") {
+        MQTTPrinter.Status = ' ';
+      }
+      else if (JsonParseRoot(tempstring, "_event", 0) == " Connected") {
+        MQTTPrinter.Status = ' ';
+        MQTTPrinter.ConnectState = OCTO_CONNECTED;
+      }
+      else if (JsonParseRoot(tempstring, "_event", 0) == " Disconnecting") {
+        MQTTPrinter.Status = 'B';
+      }
+      else if (JsonParseRoot(tempstring, "_event", 0) == " Disconnected") {
+        MQTTPrinter.Status = 'B';
+        client.disconnect();  // force things to start over
+        MQTTPrinter.ConnectState = OCTO_DISCONNECTED;
+      }
+
+      if (MQTTPrinter.ConnectState == OCTO_DISCONNECTED) {
+        break;
+      }
+      
       // print job possibilities
       //    PRINT_STARTED = "PrintStarted"
       //    PRINT_DONE = "PrintDone"
@@ -678,9 +714,6 @@ void callback(char* topic, byte* payload, unsigned int length)
       //    B=busy (e.g. running a macro),
       //    F=performing firmware update
 
-#if defined(DEBUGLEVEL3_ACTIVE)
-      Serial.print("EVENT");
-#endif
       if (JsonParseRoot(tempstring, "_event", 0) == " PrintStarted") {
         MQTTPrinter.Status = 'P';
       }
@@ -848,6 +881,7 @@ void setup()
   MQTTPrinter.HeaterStatusHotend = 0;
   MQTTPrinter.FractionPrinted = 0.0;
   MQTTPrinter.UpdatePending = false;
+  MQTTPrinter.ConnectState = OCTO_CONNECTED;
 }
 
 #if defined(ON_OFF_BUTTON_MOMENTARY) || defined(ON_OFF_BUTTON_LATCHING)
@@ -907,8 +941,16 @@ void loop()
   DebugOnOff();
 #endif
 
+  // are we receiving updated information
+  if (MQTTPrinter.ConnectState == OCTO_DISCONNECTED) {
+    NeoPixelTempHotend.fill(NeoPixelPrinterStatColorDisconnected);
+    NeoPixelPrinterStat.fill(NeoPixelPrinterStatColorDisconnected);
+    NeoPixelTempHeatbed.fill(NeoPixelPrinterStatColorDisconnected);
+    // refresh the displays if they're on
+    NeoPixelRefresh(false);
+  }
   //NeopixelRefresh?
-  if ((millis() - NeoPixelTimerRefresh) >= NeopixelRefreshSpeed) {
+  else if ((millis() - NeoPixelTimerRefresh) >= NeopixelRefreshSpeed) {
     NeoPixelTimerRefresh = millis();
 
     //New PrinterStatusUpdate?
